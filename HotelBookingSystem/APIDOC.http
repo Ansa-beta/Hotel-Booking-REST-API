@@ -1,0 +1,67 @@
+###
+GET http://127.0.0.1:8000/room/
+Accept:application/json
+
+###
+POST http://127.0.0.1:8000/room/
+Content-Type:application/json
+
+{
+    "room_number":103,
+    "room_type":"Single",
+    "price":1000
+}
+
+###
+GET http://127.0.0.1:8000/room/1/
+Accept:application/json
+
+
+###
+PUT http://127.0.0.1:8000/room/1/
+Content-Type:application/json
+
+{
+    "room_number":100,
+    "room_type":"Double",
+    "price":1000
+}
+
+###
+DELETE http://127.0.0.1:8000/room/5/
+
+
+
+###
+GET http://127.0.0.1:8000/booking/
+Accept:application/json
+
+###
+POST http://127.0.0.1:8000/booking/
+Content-Type:application/json
+
+{
+    "customer_name":"Ansa",
+    "room_number":102,
+    "check_in_date":"2026-11-18",
+    "check_out_date":"2026-11-19"
+}
+
+
+###
+GET http://127.0.0.1:8000/booking/1/
+Accept:application/json
+
+###
+PUT http://127.0.0.1:8000/booking/1/
+Content-Type:application/json
+
+{
+   "customer_name":"Tom",
+    "room_number":101,
+    "check_in_date":"2026-11-18",
+    "check_out_date":"2026-11-19"   
+}
+
+###
+DELETE http://127.0.0.1:8000/booking/9/
