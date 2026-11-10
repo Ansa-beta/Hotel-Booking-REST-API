@@ -2,11 +2,15 @@ from django.shortcuts import render,get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from hotelapp.models import RoomDb,BookingDb
-from hotelapp.serializers import RoomSerializer,BookingSerializer
+from hotelapp.serializers import RoomSerializer,BookingSerializer,UserSerializer
 from rest_framework import serializers
 from datetime import datetime
+from django.contrib.auth.models import User
+from rest_framework import authentication,permissions
 
 class RoomListCreateView(APIView):
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
     def get(self,request):
         qs=RoomDb.objects.all()
         serializer_instance=RoomSerializer(qs,many=True)
@@ -21,6 +25,8 @@ class RoomListCreateView(APIView):
             return Response(data=serializer_instance.errors)
 
 class RoomRetrieveUpdateDeleteView(APIView):
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
     def get(self,request,pk):
         qs=get_object_or_404(RoomDb,id=pk)
         serializer_instance=RoomSerializer(qs)
@@ -42,6 +48,8 @@ class RoomRetrieveUpdateDeleteView(APIView):
         })
 
 class BookingListCreateView(APIView):
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
     def get(self,request):
         qs=BookingDb.objects.all()
         serializer_instance=BookingSerializer(qs,many=True)
@@ -55,6 +63,11 @@ class BookingListCreateView(APIView):
             check_in=serializer_instance.validated_data.get("check_in_date")
             check_out=serializer_instance.validated_data.get("check_out_date")
             
+            #Check whether the room exists or not
+            room_exists=RoomDb.objects.filter(room_number=room_no).exists()
+            if not room_exists:
+                raise serializers.ValidationError("Room number does not exist")
+
             # Check whether the room is already booked
             existing_booking=BookingDb.objects.filter(
                 room_number=room_no,
@@ -84,43 +97,9 @@ class BookingListCreateView(APIView):
         else:
             return Response(data=serializer_instance.errors)
 
-
-# Existing booking: 5–8
-# Case 1: New booking 8–10
-# - Condition 1: 5 < 10 → True
-# - Condition 2: 8 > 8 → False
-# - Result: No overlap ✅ So booking allowed
-# Case 2: New booking 1–4
-# - Condition 1: 5 < 4 → False
-# - Condition 2: 8 > 1 → True
-# - Result: No overlap ✅ So booking allowed
-# Case 3: New booking 6–8
-# - Condition 1: 5 < 8 → True
-# - Condition 2: 8 > 6 → True
-# - Result: Overlap ❌ No booking allowed
-# Case 4: New booking 6–9
-# - Condition 1: 5 < 9 → True
-# - Condition 2: 8 > 6 → True
-# - Result: Overlap ❌ No booking allowed
-# Case 5: New booking 4–6
-# - Condition 1: 5 < 6 → True
-# - Condition 2: 8 > 4 → True
-# - Result: Overlap ❌ No booking allowed
-# Case 6: New booking 5–8
-# - Condition 1: 5 < 8 → True
-# - Condition 2: 8 > 5 → True
-# - Result: Overlap ❌ No booking allowed
-# Case 7: New booking 8–12
-# - Condition 1: 5 < 12 → True
-# - Condition 2: 8 > 8 → False
-# - Result: No overlap ✅ So booking allowed
-# Case 8: New booking 1–5
-# - Condition 1: 5 < 5 → False
-# - Condition 2: 8 > 1 → True
-# - Result: No overlap ✅ So booking allowed
-
-
 class BookingRetrieveUpdateDeleteView(APIView):
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
     def get(self,request,pk):
         booking_object=get_object_or_404(BookingDb,id=pk)
         seralizer_instance=BookingSerializer(booking_object)
@@ -140,10 +119,6 @@ class BookingRetrieveUpdateDeleteView(APIView):
                 check_in_date__lt=check_out,
                 check_out_date__gt=check_in
             ).exclude(id=pk).exists()
-            print("Room:", room_no)
-            print("Check-in:", check_in)
-            print("Check-out:", check_out)
-            print("Conflict:", existing_booking)
 
             if existing_booking:
                 raise serializers.ValidationError("Room is already booked for these days")
@@ -158,3 +133,20 @@ class BookingRetrieveUpdateDeleteView(APIView):
         return Response(data={
             "Message":"Deleted successfully"
             })
+
+class SignUpView(APIView):
+    def post(self,request):
+        form_data=request.data
+        serializer_instance=UserSerializer(data=form_data)
+        if serializer_instance.is_valid():
+            serializer_instance.save()
+            return Response(data=serializer_instance.data)
+        else:
+            return Response(data=serializer_instance.errors,status=400)
+    
+    def get(self,request):
+        qs=User.objects.all()
+        serializer_instance=UserSerializer(qs,many=True)
+        return Response(data=serializer_instance.data)
+
+

@@ -24,5 +24,8 @@ urlpatterns = [
     path('room/<int:pk>/',views.RoomRetrieveUpdateDeleteView.as_view()),
 
     path('booking/',views.BookingListCreateView.as_view()),
-    path('booking/<int:pk>/',views.BookingRetrieveUpdateDeleteView.as_view())
+    path('booking/<int:pk>/',views.BookingRetrieveUpdateDeleteView.as_view()),
+
+    path('register/',views.SignUpView.as_view()),
+    path('user/',views.SignUpView.as_view())
 ]
