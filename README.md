@@ -1,65 +1,136 @@
-# Hotel Booking System API
 
-A Django REST Framework API for managing hotel rooms and customer bookings. It provides CRUD endpoints for rooms and bookings and rejects bookings that overlap for the same room.
+# Hotel Booking REST API
+
+A Django REST Framework project for managing hotel rooms and customer bookings. The API supports room and booking management, including validation to prevent conflicting bookings for the same room on overlapping dates.
 
 ## Features
 
-- Create, list, retrieve, update, and delete rooms.
-- Create, list, retrieve, update, and delete bookings.
-- Check for overlapping bookings when creating or updating a booking.
-- Assign a booking number and booking time when a booking is created.
+- Create, read, update, and delete rooms
+- Create, read, update, and delete bookings
+- Prevent overlapping bookings for the same room
+- Automatic booking number generation
+- Automatic booking time generation
+- Authentication-based API access
+- JSON response format
 
-## Requirements
+## Tech Stack
+
+- Python
+- Django
+- Django REST Framework
+- MySQL
+- Django ORM
+
+## Project Structure
+
+```bash
+HotelBookingSystem/
+│
+├── HotelBookingSystem/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+│
+├── hotelapp/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── views.py
+│   └── migrations/
+│
+├── manage.py
+├── db.sqlite3
+├── README.md
+└── requirements.txt
+```
+
+## Prerequisites
 
 - Python 3.10+
-- MySQL
+- MySQL Server
+- Virtual environment
 
-The project settings use Django 5.0.1, Django REST Framework, and a local MySQL database. The MySQL database must exist before running migrations.
+## Installation
 
-## Setup
+1. Clone the repository
 
-1. Clone the repository and enter the project directory.
-2. Create and activate a virtual environment:
+```bash
+git clone https://github.com/your-username/hotel-booking-rest-api.git
+cd hotel-booking-rest-api
+```
 
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
+2. Create and activate a virtual environment
 
-3. Install the dependencies:
+```bash
+python -m venv venv
+```
 
-   ```powershell
-   python -m pip install Django==5.0.1 djangorestframework mysqlclient
-   ```
+Windows:
+```bash
+venv\Scripts\activate
+```
 
-4. Configure the `DATABASES` setting in `HotelBookingSystem/settings.py` for your local MySQL database. Keep database credentials out of source control.
-5. Apply migrations and start the development server:
+macOS/Linux:
+```bash
+source venv/bin/activate
+```
 
-   ```powershell
-   python manage.py migrate
-   python manage.py runserver
-   ```
+3. Install dependencies
 
-The API is available at `http://127.0.0.1:8000/`.
+```bash
+pip install django djangorestframework mysqlclient
+```
 
-## API endpoints
+4. Configure MySQL in `HotelBookingSystem/settings.py`
 
-All endpoints accept and return JSON.
+Update the `DATABASES` section with your local MySQL database credentials.
+
+5. Apply migrations
+
+```bash
+python manage.py migrate
+```
+
+6. Run the server
+
+```bash
+python manage.py runserver
+```
+
+The project will run at:
+
+```bash
+http://127.0.0.1:8000/
+```
+
+## API Endpoints
+
+### Room Endpoints
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/room/` | List rooms |
-| `POST` | `/room/` | Create a room |
-| `GET` | `/room/{id}/` | Retrieve a room |
-| `PUT` | `/room/{id}/` | Update a room |
-| `DELETE` | `/room/{id}/` | Delete a room |
-| `GET` | `/booking/` | List bookings |
-| `POST` | `/booking/` | Create a booking |
-| `GET` | `/booking/{id}/` | Retrieve a booking |
-| `PUT` | `/booking/{id}/` | Update a booking |
-| `DELETE` | `/booking/{id}/` | Delete a booking |
+|--------|----------|-------------|
+| GET | `/room/` | Get all rooms |
+| POST | `/room/` | Create a room |
+| GET | `/room/{id}/` | Get room by ID |
+| PUT | `/room/{id}/` | Update room |
+| DELETE | `/room/{id}/` | Delete room |
 
-### Create a room
+### Booking Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/booking/` | Get all bookings |
+| POST | `/booking/` | Create a booking |
+| GET | `/booking/{id}/` | Get booking by ID |
+| PUT | `/booking/{id}/` | Update booking |
+| DELETE | `/booking/{id}/` | Delete booking |
+
+## Example: Create a Room
 
 ```http
 POST /room/
@@ -70,13 +141,12 @@ Content-Type: application/json
 {
   "room_number": 103,
   "room_type": "Single",
-  "price": "1000.00"
+  "price": "1000.00",
+  "is_available": true
 }
 ```
 
-`is_available` is optional and defaults to `true`.
-
-### Create a booking
+## Example: Create a Booking
 
 ```http
 POST /booking/
@@ -92,8 +162,12 @@ Content-Type: application/json
 }
 ```
 
-On success, the API returns a booking success message with the assigned booking number and time. A booking is rejected if its date range overlaps another booking for the same room. Check-in and check-out dates use the `YYYY-MM-DD` format.
+The API validates the booking dates and rejects requests where the new booking overlaps with an existing reservation for the same room.
 
-## API request examples
+## Notes
 
-The repository includes additional request examples in [`HotelBookingSystem/APIDOC.http`](HotelBookingSystem/APIDOC.http).
+This project demonstrates backend development using Django REST Framework, model-based data handling, and business rule validation for hotel booking operations.
+
+## License
+
+This project is for educational and portfolio purposes.
